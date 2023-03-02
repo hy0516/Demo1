@@ -49,17 +49,7 @@ AVL *RightRotate(AVL *T){
   T->height= getheight(T);
   return  x;
 }
-AVL *RightRotate1(AVL **T){
-  //右旋
-  AVL *x = (*T)->left;
-  AVL *xr = x->right;
-  // 旋转
-  x->right = (*T);
-  (*T)->left = xr;;
-  x->height= getheight(x);
-  (*T)->height= getheight((*T));
-  return  x;
-}
+
 
 AVL *LeftRotate(AVL *y){
   //左旋
