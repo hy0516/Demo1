@@ -9,8 +9,6 @@ typedef struct BalancedTree{
 int getheight(AVL *T)
 //求节点的高度  辅助完成平衡因子的计算
 {
-  // 请在这里补充代码，完成本关任务
-  /********** Begin *********/
   if(T==NULL){
     return 0;
   }
