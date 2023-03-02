@@ -6,29 +6,6 @@ typedef struct BalancedTree{
   int bf;//平衡因子
 }AVL;
 
-typedef  struct  stacknode        /*链栈存储类型*/
-{
-  AVL *node;          /*定义结点的数据域*/
-  struct  stacknode    *next;    /*定义结点的指针域*/
-} LinkStack;
-void Push(LinkStack *S,AVL *x)
-{  /*进栈函数*/
-  LinkStack *p;
-  p=(LinkStack *)malloc(sizeof(LinkStack));/*生成新结点*/
-  (p->node)=x;     /*将x放入新结点的数据域*/
-  p->next=S->next;     /*将新结点插入链表表头之前*/
-  S->next=p;          /*新结点作为栈顶*/
-}
-int EmptyStack(LinkStack *S)
-{  /*判断栈空函数*/
-  if(S==NULL)           /*栈为空*/
-    return 1;
-  else
-    return 0;
-}
-
-
-
 int getheight(AVL *T)
 //求节点的高度  辅助完成平衡因子的计算
 {
@@ -74,7 +51,6 @@ AVL *RightRotate(AVL *T){
 }
 AVL *RightRotate1(AVL **T){
   //右旋
-
   AVL *x = (*T)->left;
   AVL *xr = x->right;
   // 旋转
@@ -180,69 +156,57 @@ void display1(AVL *T){
     display1(T->right);
   }
 }
-LinkStack* L=(LinkStack *)malloc(sizeof(LinkStack));
-
-AVL* AVLDelete( AVL *bt, int k){
-  /*在二叉排序树t中删除关键字为k的节点函数*/
-  LinkStack* L=(LinkStack *)malloc(sizeof(LinkStack));/*创建链栈存入查找路径*/
-  L->next=NULL;
-  AVL *p2;
-  AVL *p, *f,*s ,*q;
-  p=bt;f=NULL;
-  while(p)/*查找关键字为k的待删结点p*/
-  {   if(p->data==k ){
-      break;}    /*找到，则跳出查找循环*/
-    f=p;                     /*f指向p结点的双亲结点*/
-    if(p->data>k) {
-      Push(L, p);/*路径节点入栈*/
-      p = p->left;
+AVL *FixBf(AVL *T){ //删除节点后，需要判断是否仍平衡，如果不平衡，则需要调整
+  if(T == NULL){
+    return NULL;
+  }
+  if (T->bf>1) {
+    if (getheight(T->left->left) > getheight(T->left->right)){
+      return  RightRotate(T);
     }
-    else {
-      Push(L, p);/*路径节点入栈*/
-      p = p->right;
-    }
+    else if (getheight(T->left->left) < getheight(T->left->right))
+      return DoubleTrunLeftRight(T);
+  } else if (T->bf <-1) {
+    if (getheight(T->right->right) > getheight(T->right->left))
+      return LeftRotate(T);
+    else if (getheight(T->right->left) > getheight(T->right->right))
+      return DoubleTrunRightLeft(T);
   }
-  if(p==NULL) return bt;       /*若找不到，返回原来的二叉排序树*/
-  if(p->left==NULL)          /*p无左子树*/
-  {  if(f==NULL)               /*p是原二叉排序树的根*/
-      bt=p->right;
-    else if(f->left==p)     /*p是f的左孩子*/
-      f->left=p->right;  /*将p的右子树链到f的左链上*/
-    else /*p是f的右孩子*/
-      f->right=p->right ; /*将p的右子树链到f的右链上*/
-    free(p);                  /*释放被删除的节点p*/
-  }
-  else /*p有左子树*/
-  {   q=p;s=p->left;
-    while(s->right)         /*在p的左子树中查找最右下结点*/
-    {  q=s;s=s->right;}
-    if(q==p) q->left=s->left ;/*将s的左子树链到q左孩子指针*/
-    else q->right=s->left;
-    p->data=s->data;        /*将s的值赋给p*/
-    free(s);
-  }
-  bt=p2;
-  LinkStack *p1=L->next;
-  while (p1!=NULL){
-    renovate(p1->node);/*更新节点平衡因子*/
-    if ((p1->node)->bf>1) {
-      if (getheight((p1->node)->left->left) > getheight((p1->node)->left->right)){
-          return  RightRotate(p1->node->left);
-      }
-      else if (getheight((p1->node)->left->left) < getheight((p1->node)->left->right))
-        return DoubleTrunLeftRight((p1->node));
-    } else if ((p1->node)->bf <-1) {
-      if (getheight((p1->node)->right->right) > getheight((p1->node)->right->left))
-        return LeftRotate(p1->node);
-      else if (getheight((p1->node)->right->left) > getheight((p1->node)->right->right))
-        return DoubleTrunRightLeft((p1->node));
-    }
-    p1=p1->next;
-  }
-
-  return bt;
+  renovate(T);
+  return T;
 }
-
+AVL *Delete(AVL *T , int x){
+  if(T == NULL){
+    return NULL;
+  }
+  if(T->data == x){ //如果找到待删除节点
+    if(T->right == NULL){ //如果该节点的右孩子为NULL，那么直接将其删除
+      AVL* temp = T;
+      T = T->left;
+     free(temp);
+    }
+    else{ //否则，将其右子树的最左孩子作为这个节点，并且递归删除这个节点的值
+      AVL *temp;
+      temp = T->right;
+      while(temp->left){
+        temp = temp->left;
+      }
+      T->data = temp->data;
+      T->right = Delete(T->right , T->data);
+      renovate(T);//更新平衡节点
+    }
+    return T;
+  }
+  if(T->data > x){ //调整删除节点后的节点
+    T->left = Delete(T->left , x);
+  }
+  if(T->data < x){
+    T->right = Delete(T->right , x);
+  }
+  renovate(T);
+  T = FixBf(T);
+  return T;
+}
 
 int main(){
   int arr[]={10,20,30,40,50,25};
