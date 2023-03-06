@@ -1,11 +1,11 @@
-typedef struct BalancedTree{
+typedef struct BalancedTree{  
   struct BalancedTree* left;//左节点
   struct  BalancedTree* right;//右节点
   int data;//数据
   int height;//结点高度
   int bf;//平衡因子
 }AVL;
-
+1111
 int getheight(AVL *T)
 //求节点的高度  辅助完成平衡因子的计算
 {
