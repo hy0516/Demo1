@@ -5,7 +5,7 @@ typedef struct BalancedTree{
   int height;//结点高度
   int bf;//平衡因子
 }AVL;
-
+//这是一条注释
 int getheight(AVL *T)
 //求节点的高度  辅助完成平衡因子的计算
 {
